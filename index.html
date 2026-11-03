@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My First Web3 DApp</title>
+
+    <style>
+        body {
+            background: #111827;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 30px;
+            background: #1f2937;
+            border-radius: 12px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #f59e0b;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        p {
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>My First Web3 DApp</h1>
+
+        <p id="status">Wallet not connected</p>
+
+        <button id="connectButton">
+            Connect MetaMask
+        </button>
+
+        <p id="address"></p>
+        <p id="network"></p>
+    </div>
+
+    <script>
+        const button = document.getElementById("connectButton");
+        const status = document.getElementById("status");
+        const address = document.getElementById("address");
+        const network = document.getElementById("network");
+
+        if (typeof window.ethereum === "undefined") {
+            status.textContent = "No compatible wallet detected.";
+            button.disabled = true;
+        }
+
+        async function connectWallet() {
+            try {
+                const accounts = await window.ethereum.request({
+                    method: "eth_requestAccounts"
+                });
+
+                const walletAddress = accounts[0];
+
+                status.textContent = "Wallet connected!";
+                address.textContent = "Address: " + walletAddress;
+
+                const chainId = await window.ethereum.request({
+                    method: "eth_chainId"
+                });
+
+                network.textContent = "Chain ID: " + chainId;
+
+            } catch (error) {
+                status.textContent =
+                    error.code === 4001
+                    ? "Connection request rejected."
+                    : "Connection failed: " + error.message;
+            }
+        }
+
+        button.addEventListener("click", connectWallet);
+
+        if (window.ethereum) {
+            window.ethereum.on("accountsChanged", (accounts) => {
+                address.textContent = accounts.length
+                    ? "Address: " + accounts[0]
+                    : "";
+
+                status.textContent = accounts.length
+                    ? "Wallet connected!"
+                    : "No account connected.";
+            });
+
+            
+            window.ethereum.on("chainChanged", (chainId) => {
+                network.textContent = "Chain ID: " + chainId;
+            });
+        }
+    </script>
+
+</body>
+</html>
